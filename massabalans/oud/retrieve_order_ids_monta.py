@@ -4,16 +4,20 @@ import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
+from typing import List, Optional
 
 # Import keys.env
 load_dotenv()
 
 # Define variables
-api_url = os.getenv("MONTA_API_URL")
-username = os.getenv("MONTA_USERNAME")
-password = os.getenv("MONTA_PASSWORD")
+api_url: str = os.getenv("MONTA_API_URL", "")
+username: str = os.getenv("MONTA_USERNAME", "")
+password: str = os.getenv("MONTA_PASSWORD", "")
 
-def retrieve_order_ids(created_since, created_until, page, page_size=30):
+if api_url is None or username is None or password is None:
+    raise ValueError("API URL, username, or password environment variables are not set.")
+
+def retrieve_order_ids(created_since: str, created_until: str, page: int, page_size: int = 30) -> Optional[list[dict]]:
     endpoint = f"orders?created_since={created_since}&created_until={created_until}&page={page}&page_size={page_size}"
     full_url = api_url + endpoint
     response = requests.get(full_url, auth=HTTPBasicAuth(username, password))
@@ -22,10 +26,10 @@ def retrieve_order_ids(created_since, created_until, page, page_size=30):
         order_data = response.json()
         return order_data
     else:
-        print(f"Failed to retrieve orders: {response.status_code}")
+        print(f"Failed to retrieve orders: {response.status_code} - {response.text}")
         return None
 
-def extract_order_ids(order_data):
+def extract_order_ids(order_data: list[dict]) -> List[str]:
     order_ids = []
     
     for order in order_data:

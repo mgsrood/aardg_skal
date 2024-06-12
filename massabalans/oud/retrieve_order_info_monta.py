@@ -66,8 +66,8 @@ def create_order_dataframe(order_ids):
         if order:
             batches = retrieve_order_batches(order_id)
             if batches:
-                for batch in batches['m_Item3']:
-                    sku = batch['sku']
+                for batch in batches['BatchLines']:
+                    sku = batch['Sku']
                     product_name = sku_to_product_name.get(sku, 'Unknown')
                     if product_name != 'Unknown':
                         batch_info = {
@@ -84,9 +84,9 @@ def create_order_dataframe(order_ids):
                             'ordered': order['Received'],
                             'shipped': order.get('Shipped'),
                             'sku': sku,
-                            'quantity': abs(batch['quantity']),
-                            'batch_title': batch['batch']['title'],
-                            'batch_bestbeforedate': batch['batch']['bestbeforedate'],
+                            'quantity': abs(batch['Quantity']),
+                            'batch_title': batch['BatchContent']['Title'] if batch.get('BatchContent') else None,
+                            'batch_bestbeforedate': batch['BatchContent']['BestBefore'] if batch.get('BatchContent') else None,
                             'product_name': product_name
                         }
                         order_data.append(batch_info)
@@ -118,8 +118,8 @@ def transfer_data_to_bigquery(df):
 if __name__ == "__main__":
 
     # Define the order ids
-    created_since = '2023-04-01'
-    created_until = '2023-05-01'
+    created_since = '2024-04-01'
+    created_until = '2024-05-01'
     page_size = 30  # Maximum page size
     max_orders = 10000
     all_order_ids = []
