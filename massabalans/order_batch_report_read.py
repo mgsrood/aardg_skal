@@ -96,7 +96,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(gc_keys, scope)
 client = gspread.authorize(creds)
 
 # Open sheet
-sheet = client.open('Massabalans - Verkoop Monta')
+sheet = client.open('Massabalans Verkoop Monta')
 
 # Write dataframes to sheet
 dataframes = [df_probiotica, df_kombucha, df_bulk_kombucha, df_waterkefir, df_bulk_waterkefir, df_mix, df_bloem, df_bulk_bloem, df_citroen, df_bulk_citroen, df_gember, df_bulk_gember, df_frisdrank, df_starter_box]
@@ -104,16 +104,20 @@ sheet_names = ['Probiotica', 'Kombucha', 'Bulk Kombucha', 'Waterkefir', 'Bulk Wa
 
 # Write dataframes to sheet
 for df, sheet_name in zip(dataframes, sheet_names):
-    # Check for present sheets
     try:
+        # Zoek het bestaande werkblad
         existing_worksheet = sheet.worksheet(sheet_name)
-        # Remove the old sheets
-        sheet.del_worksheet(existing_worksheet)
+        # Vind de huidige gegevensbereik in het werkblad
+        existing_data_range = existing_worksheet.get('A1').extend('table')
+        # Verwijder de oude gegevens in het bereik
+        existing_worksheet.batch_clear([existing_data_range])
+        # Update de gegevens met de nieuwe dataframe
+        existing_worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+        print(f"{sheet_name} werkblad bijgewerkt.")
     except gspread.exceptions.WorksheetNotFound:
-        pass  
-
-    # Add the new worksheet
-    worksheet = sheet.add_worksheet(title=sheet_name, rows=df.shape[0], cols=df.shape[1])
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+        # Voeg een nieuw werkblad toe als het niet bestaat
+        worksheet = sheet.add_worksheet(title=sheet_name, rows=df.shape[0], cols=df.shape[1])
+        worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+        print(f"{sheet_name} werkblad toegevoegd.")
 
 print("Dataframes zijn succesvol geüpload naar Google Sheets!")
