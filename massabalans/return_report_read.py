@@ -35,7 +35,7 @@ def remove_styles_from_xlsx(original_report: str, cleaned_report: str) -> None:
 
 # Path to the original file
 report_folder: str = os.getenv("CSV_MAIN_PATH", "")
-original_file: str = "Retour Info 2024-06-12.xlsx"
+original_file: str = "Returns 2024-06-17.xlsx"
 original_report: str = report_folder + original_file
 
 # Date extension
